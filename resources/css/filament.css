@@ -1,0 +1,23 @@
+@import '../../vendor/filament/filament/resources/css/app.css';
+
+.filament-forms-repeater-component>div {
+    justify-content: left;
+}
+.filament-forms-repeater-component ul li:not(:first-child) header p {
+    display:none;
+}
+.show-primary-section .filament-forms-repeater-component ul li:first-child header p {
+    padding: 12px;
+    background-color: #1183ca;
+    color: #ffffff;
+}
+div:has(> div div.filament-forms-tabs-component) {
+    grid-template-columns: repeat(1, minmax(0, 1fr)); /* Set the grid to have a single column for large screens */
+}
+/* .filepond--list-scroller ul{
+    display:flex;
+}
+.filepond--list-scroller ul li{
+    height:120px;
+    width:120px;
+} */
