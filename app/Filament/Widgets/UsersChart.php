@@ -48,3 +48,4 @@ class UsersChart extends BarChartWidget
         ];
     }
 }
+
