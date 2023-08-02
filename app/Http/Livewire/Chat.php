@@ -9,7 +9,9 @@ use App\Models\Conversation;
 class Chat extends Component
 {
     public $userID = 5;
+    public $userAvatarPath= 'assets/avatar/5.jfif';
     public $targetID = 6;
+    public $targetAvatarPath= 'assets/avatar/6.jfif';
     public $conversationID;
     public $chat_list;
     public function mount()
