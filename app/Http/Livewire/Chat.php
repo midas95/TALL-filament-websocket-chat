@@ -23,7 +23,7 @@ class Chat extends Component
 
     public function getChatHistory(){
         $this->conversationID = Conversation::where('participant_a_id', $this->userID)->where('participant_b_id', $this->targetID)->value('id');
-        $this->chat_list = Message::where('conversation_id', $this->conversationID)->orderBy('id', 'desc')->get();
+        $this->chat_list = Message::where('conversation_id', $this->conversationID)->orderBy('id', 'asc')->get();
     }
     public function render()
     {
