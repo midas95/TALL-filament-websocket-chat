@@ -138,4 +138,6 @@ return [
      * `ChannelManager` interface provided by this package.
      */
     'channel_manager' => \BeyondCode\LaravelWebSockets\WebSockets\Channels\ChannelManagers\ArrayChannelManager::class,
+    'perform_dns_lookup' => env('LARAVEL_WEBSOCKETS_PERFORM_DNS_LOOKUP', true),
+
 ];
