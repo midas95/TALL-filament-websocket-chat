@@ -34,7 +34,7 @@ class NewChatMessage
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('chat'),
+            new Channel('chat'),
         ];
     }
 }
