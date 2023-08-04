@@ -200,15 +200,26 @@ return [
 
     'broadcasting' => [
 
-        // 'echo' => [
-        //     'broadcaster' => 'pusher',
-        //     'key' => env('VITE_PUSHER_APP_KEY'),
-        //     'cluster' => env('VITE_PUSHER_APP_CLUSTER'),
-        //     'wsHost' => env('VITE_PUSHER_HOST'),
-        //     'wsPort' => env('VITE_PUSHER_PORT'),
-        //     'wssPort' => env('VITE_PUSHER_PORT'),
-        //     'forceTLS' => true,
-        // ],
+        'echo' => [
+            //     'broadcaster' => 'pusher',
+            //     'key' => env('VITE_PUSHER_APP_KEY'),
+            //     'cluster' => env('VITE_PUSHER_APP_CLUSTER'),
+            //     'wsHost' => env('VITE_PUSHER_HOST'),
+            //     'wsPort' => env('VITE_PUSHER_PORT'),
+            //     'wssPort' => env('VITE_PUSHER_PORT'),
+            //     'forceTLS' => true,
+
+            'broadcaster' => 'pusher',
+            'key' => env('PUSHER_APP_KEY'),
+            'secret' => env('PUSHER_APP_SECRET'),
+            'app_id' => env('PUSHER_APP_ID'),
+            'cluster' => env('PUSHER_APP_CLUSTER'),
+            'wsHost' => env('PUSHER_APP_HOST'),
+            'wsPort' => env('PUSHER_APP_PORT'),
+            'scheme' => env('PUSHER_APP_SCHEME'),
+            'forceTLS' => false,
+            
+        ],
 
     ],
 

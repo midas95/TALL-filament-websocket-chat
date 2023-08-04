@@ -41,8 +41,17 @@ class Chat extends Component
             $this->targetID = 6;
             $this->userAvatarPath = 'assets/avatar/5.jfif';
             $this->targetAvatarPath = 'assets/avatar/6.jfif';
-        } else {
+        } elseif ($this->message['user_id'] == 6) {
             $this->targetID = 5;
+            $this->userAvatarPath = 'assets/avatar/5.jfif';
+            $this->targetAvatarPath = 'assets/avatar/6.jfif';
+        } 
+        elseif ($this->message['user_id'] == 2) {
+            $this->targetID = 7;
+            $this->userAvatarPath = 'assets/avatar/5.jfif';
+            $this->targetAvatarPath = 'assets/avatar/6.jfif';
+        } else {
+            $this->targetID = 2;
             $this->userAvatarPath = 'assets/avatar/6.jfif';
             $this->targetAvatarPath = 'assets/avatar/5.jfif';
         }
@@ -50,8 +59,6 @@ class Chat extends Component
         $this->getConversation();
         $this->getChatHistory();
     }
-
-
 
     public function send()
     {

@@ -31,6 +31,7 @@ class FilamentServiceProvider extends ServiceProvider
         Filament::serving(function() {
             Filament::registerTheme(
                 app(Vite::class)('resources/css/filament.css'),
+                
             );
             if (auth()->user()) {
                 if (auth()->user()->is_admin === 1 && auth()->user()->hasAnyRole(['super-admin', 'admin', 'moderator'])) {
@@ -51,5 +52,11 @@ class FilamentServiceProvider extends ServiceProvider
                 }
             }
         });
+        Filament::registerScripts([
+            app(Vite::class)('resources/css/app.css'),
+        ]);
+        Filament::registerScripts([
+            app(Vite::class)('resources/js/app.js'),
+        ], true);
     }
 }
