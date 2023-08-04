@@ -26,3 +26,10 @@ npm run build
 ```
 php artisan serve
 ```
+
+### Run Websocket server
+
+```
+php artisan websockets:serve
+```
+

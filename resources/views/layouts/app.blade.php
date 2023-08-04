@@ -41,5 +41,13 @@
         @stack('modals')
 
         @livewireScripts
+
+        <!-- <script type="module">
+
+        Echo.channel('chat')
+            .listen('NewChatMessage', (e) => {
+                console.log(e);
+            })
+        </script> -->
     </body>
 </html>

@@ -6,12 +6,14 @@ use App\Events\NewChatMessage;
 use Livewire\Component;
 use App\Models\Message;
 use App\Models\Conversation;
+use Livewire\Request;
+
 
 class Chat extends Component
 {
-    public $targetID = 6;
-    public $userAvatarPath = 'assets/avatar/5.jfif';
-    public $targetAvatarPath = 'assets/avatar/6.jfif';
+    public $targetID;
+    public $userAvatarPath;
+    public $targetAvatarPath;
     public $conversation = [
         'type' => 'private',
         'participant_a_id' => Null,
@@ -30,16 +32,26 @@ class Chat extends Component
         'seen' => Null,
 
     ];
+    protected $listeners = ['echo:chat,NewChatMessage' => 'getNewMessage'];
 
     public function mount()
     {
-        $this->message['user_id'] = $this->conversation['participant_a_id'] = 5;
-        // auth()->user()->id;
-        $this->conversation['participant_b_id'] = $this->targetID;
+        $this->message['user_id'] = $this->conversation['participant_a_id'] = auth()->user()->id;
+        if ($this->message['user_id'] == 5) {
+            $this->targetID = 6;
+            $this->userAvatarPath = 'assets/avatar/5.jfif';
+            $this->targetAvatarPath = 'assets/avatar/6.jfif';
+        } else {
+            $this->targetID = 5;
+            $this->userAvatarPath = 'assets/avatar/6.jfif';
+            $this->targetAvatarPath = 'assets/avatar/5.jfif';
+        }
+
         $this->getConversation();
         $this->getChatHistory();
-
     }
+
+
 
     public function send()
     {
@@ -55,11 +67,8 @@ class Chat extends Component
         $message->content = $this->content;
         $message->seen = $this->message['seen'];
         $message->save();
-
-        // $chat_user = User::find($this->chat_id);
-        //sending event with message content and the user Isend it to , and the numb of the Unreaded Messages
-        event(new NewChatMessage($this->content, $this->message['user_id']));
-        $this->getChatHistory();
+        broadcast(new NewChatMessage($this->content, $this->message['user_id'], $this->targetID, $message->id))->toOthers();
+        $this->chat_list->push($message);
         $this->reset('content');
     }
 
@@ -69,19 +78,31 @@ class Chat extends Component
     }
     public function getConversation()
     {
-        if (Conversation::where('participant_a_id', $this->message['user_id'])->where('participant_b_id', $this->targetID)) {
-            $this->message['conversation_id'] = Conversation::where('participant_a_id', $this->message['user_id'])->where('participant_b_id', $this->targetID)->value('id');
-        } else {
+        $this->message['conversation_id'] = Conversation::where('participant_a_id', $this->message['user_id'])->where('participant_b_id', $this->targetID)->value('id') ?? Conversation::where('participant_a_id', $this->targetID)->where('participant_b_id', $this->message['user_id'])->value('id');
+        if (!$this->message['conversation_id']) {
             $conversation = new Conversation;
             $conversation->type = $this->conversation['type'];
             $conversation->participant_a_id = $this->conversation['participant_a_id'];
-            $conversation->participant_b_id = $this->conversation['participant_b_id'];
+            $conversation->participant_b_id = $this->targetID;
             $conversation->booking_id = $this->conversation['booking_id'];
             $conversation->save();
 
-            $this->message['conversation_id'] = $conversation->id;            
+            $this->message['conversation_id'] = $conversation->id;
         }
+    }
+    public function getNewMessage($event)
+    {
+        if ($event['to'] == auth()->user()->id) {
+            if ($event['from'] == $this->targetID) {
+                // now i am chatting
+                $message = Message::find($event['messageID']);
+                // dd($message);
+                $this->chat_list->push($message);
+            } else {
+                // notification on
 
+            }
+        }
     }
     public function render()
     {
