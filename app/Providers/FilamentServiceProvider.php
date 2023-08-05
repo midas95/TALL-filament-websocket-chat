@@ -52,11 +52,11 @@ class FilamentServiceProvider extends ServiceProvider
                 }
             }
         });
-        Filament::registerScripts([
+        Filament::registerStyles([
             app(Vite::class)('resources/css/app.css'),
         ]);
         Filament::registerScripts([
-            app(Vite::class)('resources/js/app.js'),
+            app(Vite::class)('resources/js/bootstrap.js'),
         ], true);
     }
 }
