@@ -17,14 +17,23 @@ class ConversationsSeeder extends Seeder
     public function run(): void
     {
 
+        $admin = User::where('email', 'admin@admin.com')->first();
         $user1 = User::where('email', 'test1@test.com')->first();
         $user2 = User::where('email', 'test2@test.com')->first();
+        $user3 = User::where('email', 'test3@test.com')->first();
 
 
         $conversation = Conversation::create([
             'type' => 'private',
             'participant_a_id' => $user1->id,
             'participant_b_id' => $user2->id,
+            'booking_id' => null,
+        ]);
+
+        $conversation2 = Conversation::create([
+            'type' => 'private',
+            'participant_a_id' => $admin->id,
+            'participant_b_id' => $user3->id,
             'booking_id' => null,
         ]);
 

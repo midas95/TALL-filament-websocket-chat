@@ -30,12 +30,17 @@ class Conversation extends Model
         return $this->belongsTo(Booking::class);
     }
 
-    public function interlocutor(){
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function interlocutor($justId = false){
         if(in_array($this->type,  ['biz', 'booking'])){
-            return $this->user()->current_biz_id == $this->participant_a_id ? Biz::find($this->participant_b_id) : Biz::find($this->participant_a_id);
+            return $this->user()->current_biz_id == $this->participant_a_id ? ($justId ? $this->participant_b_id : Biz::find($this->participant_b_id)) : ($justId ? $this->participant_a_id : Biz::find($this->participant_a_id));
         }
         if($this->type == 'private'){
-            return $this->user()->id == $this->participant_a_id ? User::find($this->participant_b_id) : User::find($this->participant_a_id);
+            return auth()->id() == $this->participant_a_id ? ($justId ? $this->participant_b_id : User::find($this->participant_b_id)) : ($justId ? $this->participant_a_id : User::find($this->participant_a_id));
         }
     }
 

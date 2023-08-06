@@ -10,4 +10,6 @@ class Chat extends Page
     protected static string $resource = ChatResource::class;
 
     protected static string $view = 'filament.chat';
+
+    protected static ?string $title = '';
 }
