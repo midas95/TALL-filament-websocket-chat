@@ -2,7 +2,7 @@
 
 @if($conversation['type'] == 'private')
     @if($message['user_id'] == $myUserId)
-        <div class='flex {{!$repeated?'mt-6':'mt-1'}} justify-end'>
+        <div class='flex {{!$repeated?'mt-6':'mt-1 mr-14'}} justify-end'>
             <div class='bg-emerald-800 text-white border-gray-300 p-2 rounded-md {{!$repeated?'rounded-tr-none':''}} relative'>
                 @if(!$repeated)
                 <span class="absolute text-emerald-800 top-0" style="right: -8px;" >
@@ -17,7 +17,7 @@
             @if(!$repeated)<img src='{{$message['user']->getAvatarUrl()}}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />@endif
         </div>
     @else
-        <div class='flex {{!$repeated?'mt-6':'mt-1'}} justify-start'>
+        <div class='flex {{!$repeated?'mt-6':'mt-1 ml-14'}} justify-start'>
             @if(!$repeated)<img src='{{$message['user']->getAvatarUrl()}}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />@endif
             <div class='bg-black/50 p-2 rounded-md text-white {{!$repeated?'rounded-tl-none':''}} relative'>
                 @if(!$repeated)
