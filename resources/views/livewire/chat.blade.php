@@ -23,7 +23,7 @@
                 @foreach ($conversations as $c)
                     @if (stripos($c->interlocutor()->name, $searchWord) !== false)
                         <li wire:click="openConversation({{ $c->id }})"
-                            class="flex items-center cursor-pointer {$conversation && $conversation->id == $c->id ? 'bg-gray-200' : ''}}">
+                            class="flex items-center cursor-pointer {{$conversation && $conversation->id === $c->id ? 'bg-gray-200' : ''}}">
                             <img src='{{ $c->interlocutor()->getAvatarUrl() }}' alt='avatar'
                                 class='m-2 w-10 h-10 rounded-3xl' /> {!! $this->emphasize($c->interlocutor()->name, $searchWord) !!}
                         </li>
@@ -31,9 +31,9 @@
                 @endforeach
                 <h3 class='text-xl font-bold py-2'>Users</h3>
                 @foreach ($users as $u)
-                    @if (stripos($u->name, $searchWord) !== false)
-                        <li
-                            class="flex items-center cursor-pointer {{ $conversation && $conversation->id == $u->id ? 'bg-gray-200' : '' }}">
+                    @if (stripos($u->name, $searchWord) !== false && $u->id !==$myUserId)
+                        <li wire:click="createConversation({{$u->id}})"
+                            class="flex items-center cursor-pointer">
                             <img src='{{ $u->getAvatarUrl() }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
                             {!! $this->emphasize($u->name, $searchWord) !!}
                         </li>

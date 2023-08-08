@@ -29,6 +29,7 @@ class Chat extends Component
     {
         $this->conversation = Conversation::find($conversationId);
         $this->getMessages();
+        $this->reset('content');
     }
     public function mount()
     {
@@ -79,6 +80,15 @@ class Chat extends Component
         })->all();
         $this->users = User::whereNotIn('id', $interlocutorIds)
             ->get();
+    }
+    public function createConversation($targetId)
+    {
+        $this->conversation = Conversation::create([
+            'type' => 'private',
+            'participant_a_id' => $this->myUserId,
+            'participant_b_id' => $targetId,
+        ]);
+        $this->conversations = auth()->user()->conversations();
     }
     public function render()
     {
