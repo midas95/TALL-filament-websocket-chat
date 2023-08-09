@@ -23,7 +23,7 @@
                 @foreach ($conversations as $c)
                     @if (stripos($c->interlocutor()->name, $searchWord) !== false)
                         <li wire:click="openConversation({{ $c->id }})"
-                            class="flex items-center cursor-pointer {{$conversation && $conversation->id === $c->id ? 'bg-gray-200' : ''}}">
+                            class="flex items-center cursor-pointer {{ $conversation && $conversation->id === $c->id ? 'bg-gray-200' : '' }}">
                             <img src='{{ $c->interlocutor()->getAvatarUrl() }}' alt='avatar'
                                 class='m-2 w-10 h-10 rounded-3xl' /> {!! $this->emphasize($c->interlocutor()->name, $searchWord) !!}
                         </li>
@@ -31,8 +31,8 @@
                 @endforeach
                 <h3 class='text-xl font-bold py-2'>Users</h3>
                 @foreach ($users as $u)
-                    @if (stripos($u->name, $searchWord) !== false && $u->id !==$myUserId)
-                        <li wire:click="createConversation({{$u->id}})"
+                    @if (stripos($u->name, $searchWord) !== false && $u->id !== $myUserId)
+                        <li wire:click="createConversation({{ $u->id }})"
                             class="flex items-center cursor-pointer">
                             <img src='{{ $u->getAvatarUrl() }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
                             {!! $this->emphasize($u->name, $searchWord) !!}
@@ -47,7 +47,7 @@
                 <span>{{ auth()->user()->name }}</span>
             </div>
             @if ($conversation)
-                <div class="h-[65vh] overflow-y-auto">
+                <div class="h-[65vh] overflow-y-auto" id="chatBox">
                     <?php $uId = 0;
                     $repeated = false; ?>
                     @foreach ($messages as $message)
@@ -65,3 +65,13 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    document.addEventListener('livewire:load', function() {
+        Livewire.on('updateMessages', () => {
+            var chatBox = document.getElementById("chatBox");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        })
+    })
+</script>

@@ -51,21 +51,25 @@ class Chat extends Component
 
         broadcast(new NewChatMessage($message->id, $this->conversation->id))->toOthers();
         $this->messages->push($message);
+        $this->emit('updateMessages');
         $this->reset('content');
     }
 
     public function getMessages()
     {
         $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
+        $this->emit('updateMessages');
     }
     public function getNewMessage($event)
     {
         $message = Message::find($event['messageId']);
-        //        $conversation = Conversation::find($event['conversationId']);
-
-        if ($message['user_id'] != auth()->user()->id) {
-            $this->messages->push($message);
+        if ($this->conversation !== null && $message->conversation->id === $this->conversation->id) {
+            $message['user_id'] !== auth()->user()->id && $this->messages->push($message);
+            $this->emit('updateMessages');
+        } else {
         }
+
+
     }
     public function emphasize($string, $word)
     {
@@ -89,6 +93,7 @@ class Chat extends Component
             'participant_b_id' => $targetId,
         ]);
         $this->conversations = auth()->user()->conversations();
+        $this->getUser();
     }
     public function render()
     {
