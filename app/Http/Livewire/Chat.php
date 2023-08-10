@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Events\NewChatMessage;
+use App\Events\ReadMessages;
 use Livewire\Component;
 use App\Models\Message;
 use App\Models\Conversation;
@@ -21,7 +22,9 @@ class Chat extends Component
     public function getListeners()
     {
         return [
-            'echo:chat,NewChatMessage' => 'getNewMessage'
+            'echo:chat,NewChatMessage' => 'getNewMessage',
+            'echo:read,ReadMessages' => 'getReadMessages',
+            'readMessage' => 'readMessage',
         ];
     }
 
@@ -51,7 +54,7 @@ class Chat extends Component
 
         broadcast(new NewChatMessage($message->id, $this->conversation->id))->toOthers();
         $this->messages->push($message);
-        $this->emit('updateMessages');
+        $this->emit('updateMessages', false);
         $this->reset('content');
     }
 
@@ -68,8 +71,6 @@ class Chat extends Component
             $this->emit('updateMessages');
         } else {
         }
-
-
     }
     public function emphasize($string, $word)
     {
@@ -94,6 +95,17 @@ class Chat extends Component
         ]);
         $this->conversations = auth()->user()->conversations();
         $this->getUser();
+    }
+    public function readMessage()
+    {
+        Message::where('conversation_id', $this->conversation->id)->where('user_id', '!=', $this->myUserId)->whereNull('seen')->update(['seen' => now()]);
+        broadcast(new ReadMessages($this->conversation->id))->toOthers();
+    }
+    public function getReadMessages($event)
+    {
+        if($event['conversationId'] === $this->conversation->id){
+            $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
+        }
     }
     public function render()
     {

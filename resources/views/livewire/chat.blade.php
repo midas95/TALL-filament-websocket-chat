@@ -68,10 +68,17 @@
 
 
 <script>
-    document.addEventListener('livewire:load', function() {
-        Livewire.on('updateMessages', () => {
-            var chatBox = document.getElementById("chatBox");
+    let readTimecounter;
+    document.addEventListener('livewire:load', function() {   
+        Livewire.on('updateMessages', (read = true) => {
+            clearTimeout(readTimecounter)
+            let chatBox = document.getElementById("chatBox");
             chatBox.scrollTop = chatBox.scrollHeight;
+            if(read) {
+                readTimecounter = setTimeout(()=>{
+                    Livewire.emit('readMessage')
+                },3000)
+            }
         })
     })
 </script>
