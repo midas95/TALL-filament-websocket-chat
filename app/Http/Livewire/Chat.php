@@ -17,6 +17,8 @@ class Chat extends Component
     public $users;
     public $myUserId;
     public $messages = [];
+    public $numUnread = [];
+    public $totalUnread = 0;
     public $content;
     public $searchWord = '';
     public function getListeners()
@@ -36,9 +38,10 @@ class Chat extends Component
     }
     public function mount()
     {
-        $this->conversations = auth()->user()->conversations();
-        $this->getUser();
         $this->myUserId = auth()->user()->id;
+        $this->conversations = auth()->user()->conversations();
+        $this->getUnreadMessage();
+        $this->getUser(); 
     }
 
     public function send()
@@ -66,10 +69,10 @@ class Chat extends Component
     public function getNewMessage($event)
     {
         $message = Message::find($event['messageId']);
+        $this->getUnreadMessage();
         if ($this->conversation !== null && $message->conversation->id === $this->conversation->id) {
             $message['user_id'] !== auth()->user()->id && $this->messages->push($message);
             $this->emit('updateMessages');
-        } else {
         }
     }
     public function emphasize($string, $word)
@@ -99,13 +102,21 @@ class Chat extends Component
     public function readMessage()
     {
         Message::where('conversation_id', $this->conversation->id)->where('user_id', '!=', $this->myUserId)->whereNull('seen')->update(['seen' => now()]);
+        $this->getUnreadMessage();
         broadcast(new ReadMessages($this->conversation->id))->toOthers();
     }
     public function getReadMessages($event)
     {
-        if($event['conversationId'] === $this->conversation->id){
+        if ($this->conversation !== null && $event['conversationId'] === $this->conversation->id) {
             $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
         }
+    }
+    public function getUnreadMessage()
+    {
+        foreach ($this->conversations as $conversation) {
+            $this->numUnread[$conversation->id] = Message::where('conversation_id', $conversation->id)->where('user_id', '!=', $this->myUserId)->whereNull('seen')->count();
+        }
+        $this->totalUnread = array_sum($this->numUnread);
     }
     public function render()
     {

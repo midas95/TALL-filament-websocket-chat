@@ -12,8 +12,11 @@
                         class="flex-1 w-full p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 cursor-pointer">
                         Bookings
                     </li>
-                    <li class="flex-1 w-full p-4 border-b-2 rounded-t-lg cursor-pointer">
+                    <li class="flex-1 w-full p-4 border-b-2 rounded-t-lg cursor-pointer flex items-center ">
                         Private
+                        @if( $totalUnread > 0)
+                        <div class="rounded-full h-5 w-5 ml-1 flex items-center justify-center bg-red-500 text-white">{{$totalUnread}}</div>
+                        @endif
                     </li>
                 </ul>
             </div>
@@ -26,6 +29,9 @@
                             class="flex items-center cursor-pointer {{ $conversation && $conversation->id === $c->id ? 'bg-gray-200' : '' }}">
                             <img src='{{ $c->interlocutor()->getAvatarUrl() }}' alt='avatar'
                                 class='m-2 w-10 h-10 rounded-3xl' /> {!! $this->emphasize($c->interlocutor()->name, $searchWord) !!}
+                                @if( $numUnread[$c->id] > 0)
+                                    <div class="rounded-full h-5 w-5 ml-1 flex items-center justify-center bg-red-500 text-white">{{$numUnread[$c->id]}}</div>
+                                @endif
                         </li>
                     @endif
                 @endforeach
