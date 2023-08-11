@@ -66,7 +66,7 @@
                         <x-chat.message :$message :$myUserId :$repeated :$conversation :$loop />
                     @endforeach
                 </div>
-                <x-chat.input />
+                <x-chat.input :$isTypingInterlocutor/>
             @endif
         </div>
     </div>
@@ -75,6 +75,7 @@
 
 <script>
     let readTimecounter;
+    let typingTimer;
     document.addEventListener('livewire:load', function() {   
         Livewire.on('updateMessages', (read = true) => {
             clearTimeout(readTimecounter)
@@ -83,8 +84,15 @@
             if(read) {
                 readTimecounter = setTimeout(()=>{
                     Livewire.emit('readMessage')
-                },3000)
+                },500)
             }
         })
     })
+    const setTyping = () => {
+        clearTimeout(typingTimer)
+        Livewire.emit('setTyping',true);
+        typingTimer = setTimeout(()=>{
+            Livewire.emit('setTyping', false);
+        },3000)
+    }
 </script>

@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 [x-cloak] {
     display: none;
 }
@@ -19,4 +18,49 @@
     left: 0;
     top: 0;
     opacity: 0;
+}
+
+.dot-typing {
+    margin-left: 20px;
+    left: -9999px;
+    top: -15px;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #16151a;
+    color: #16151a;
+    box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
+        10014px 0 0 0 #16151a;
+    animation: dot-typing 1.3s infinite linear;
+}
+
+@keyframes dot-typing {
+    0% {
+        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
+            10014px 0 0 0 #16151a;
+    }
+    16.667% {
+        box-shadow: 9984px -10px 0 0 #16151a, 9999px 0 0 0 #16151a,
+            10014px 0 0 0 #16151a;
+    }
+    33.333% {
+        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
+            10014px 0 0 0 #16151a;
+    }
+    50% {
+        box-shadow: 9984px 0 0 0 #16151a, 9999px -10px 0 0 #16151a,
+            10014px 0 0 0 #16151a;
+    }
+    66.667% {
+        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
+            10014px 0 0 0 #16151a;
+    }
+    83.333% {
+        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
+            10014px -10px 0 0 #16151a;
+    }
+    100% {
+        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
+            10014px 0 0 0 #16151a;
+    }
 }

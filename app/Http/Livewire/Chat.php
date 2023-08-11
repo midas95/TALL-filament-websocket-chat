@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Events\NewChatMessage;
 use App\Events\ReadMessages;
+use App\Events\setTyping;
 use Livewire\Component;
 use App\Models\Message;
 use App\Models\Conversation;
@@ -21,29 +22,40 @@ class Chat extends Component
     public $totalUnread = 0;
     public $content;
     public $searchWord = '';
+    public $isTypingInterlocutor = false;
+    
     public function getListeners()
     {
         return [
             'echo:chat,NewChatMessage' => 'getNewMessage',
             'echo:read,ReadMessages' => 'getReadMessages',
+            'echo:typingState,setTyping' => 'setTyping',
             'readMessage' => 'readMessage',
+            'setTyping' => 'broadcastTyping'
         ];
     }
 
+    /**
+     * get conversation collection from conversation ID
+     */
     public function openConversation($conversationId)
     {
         $this->conversation = Conversation::find($conversationId);
         $this->getMessages();
         $this->reset('content');
     }
+
     public function mount()
     {
         $this->myUserId = auth()->user()->id;
         $this->conversations = auth()->user()->conversations();
         $this->getUnreadMessage();
-        $this->getUser(); 
+        $this->getUser();
     }
 
+    /**
+     * Send message
+     */
     public function send()
     {
         if (empty(trim($this->content))) {
@@ -61,11 +73,18 @@ class Chat extends Component
         $this->reset('content');
     }
 
+    /**
+     * emit 'updateMessage' livewire event to update message history.
+     */
     public function getMessages()
     {
         $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
         $this->emit('updateMessages');
     }
+
+    /**
+     * event handler for broadcast event : NewChatMessage
+     */
     public function getNewMessage($event)
     {
         $message = Message::find($event['messageId']);
@@ -75,12 +94,20 @@ class Chat extends Component
             $this->emit('updateMessages');
         }
     }
+
+    /**
+     * emphasize search word in string.
+     */
     public function emphasize($string, $word)
     {
         $index1 = stripos($string, $word);
         $index2 = strlen($word);
         return substr($string, 0, $index1) . '<b>' . substr($string, $index1, $index2) . '</b>' . substr($string, $index1 + $index2);
     }
+
+    /**
+     * Get users without users who have conversation
+     */
     public function getUser()
     {
         $interlocutorIds = $this->conversations->map(function ($conversation) {
@@ -89,28 +116,44 @@ class Chat extends Component
         $this->users = User::whereNotIn('id', $interlocutorIds)
             ->get();
     }
-    public function createConversation($targetId)
+
+    /**
+     * Create conversation with interlocutorId
+     */
+    public function createConversation($interlocutorId)
     {
         $this->conversation = Conversation::create([
             'type' => 'private',
             'participant_a_id' => $this->myUserId,
-            'participant_b_id' => $targetId,
+            'participant_b_id' => $interlocutorId,
         ]);
         $this->conversations = auth()->user()->conversations();
         $this->getUser();
     }
+
+    /**
+     * livewire event handler that make unread message to read message
+     */
     public function readMessage()
     {
         Message::where('conversation_id', $this->conversation->id)->where('user_id', '!=', $this->myUserId)->whereNull('seen')->update(['seen' => now()]);
         $this->getUnreadMessage();
         broadcast(new ReadMessages($this->conversation->id))->toOthers();
     }
+
+    /**
+     * Broadcast event handler that get message to update reading state.
+     */
     public function getReadMessages($event)
     {
         if ($this->conversation !== null && $event['conversationId'] === $this->conversation->id) {
             $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
         }
     }
+
+    /**
+     * Get number of each unread messages and total unread messages.
+     */
     public function getUnreadMessage()
     {
         foreach ($this->conversations as $conversation) {
@@ -118,6 +161,25 @@ class Chat extends Component
         }
         $this->totalUnread = array_sum($this->numUnread);
     }
+
+    /**
+     * broadcast event handler that set typing state. 
+     */
+    public function setTyping($event)
+    {
+        if ($this->conversation !== null && $event['conversationId'] === $this->conversation->id) {
+            $this->isTypingInterlocutor = $event['isTyping'];
+        }
+    }
+
+    /**
+     * livewire event handler that emit broadcast event : setTyping
+     */
+    public function broadcastTyping($event)
+    {
+        broadcast(new setTyping($this->conversation->id, $event))->toOthers();
+    }
+
     public function render()
     {
         return view('livewire.chat');

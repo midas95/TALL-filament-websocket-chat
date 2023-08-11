@@ -31,3 +31,6 @@ window.Echo = new Echo({
     disableStats: true,
 });
 
+const typingStateChannel = window.Echo.channel('typingState');
+
+
