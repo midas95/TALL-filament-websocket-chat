@@ -26,7 +26,10 @@
                 @foreach ($conversations as $c)
                     @if (stripos($c->interlocutor()->name, $searchWord) !== false)
                         <li wire:click="openConversation({{ $c->id }})"
-                            class="flex items-center cursor-pointer {{ $conversation && $conversation->id === $c->id ? 'bg-gray-200' : '' }}">
+                            class="flex items-center cursor-pointer relative {{ $conversation && $conversation->id === $c->id ? 'bg-gray-200' : '' }}">
+                            @if($onlineState[$c->interlocutor()->id])
+                                <div class="absolute items-center justify-center w-4 h-4 text-xs font-bold text-white bg-green-500 border-2 border-white rounded-full top-1 left-9"></div>
+                            @endif
                             <img src='{{ $c->interlocutor()->getAvatarUrl() }}' alt='avatar'
                                 class='m-2 w-10 h-10 rounded-3xl' /> {!! $this->emphasize($c->interlocutor()->name, $searchWord) !!}
                                 @if( $numUnread[$c->id] > 0)

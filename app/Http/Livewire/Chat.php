@@ -18,12 +18,13 @@ class Chat extends Component
     public $users;
     public $myUserId;
     public $messages = [];
+    public $onlineState = [];
     public $numUnread = [];
     public $totalUnread = 0;
     public $content;
     public $searchWord = '';
     public $isTypingInterlocutor = false;
-    
+
     public function getListeners()
     {
         return [
@@ -129,6 +130,7 @@ class Chat extends Component
         ]);
         $this->conversations = auth()->user()->conversations();
         $this->getUser();
+        $this->getUnreadMessage();
     }
 
     /**
@@ -174,10 +176,22 @@ class Chat extends Component
 
     /**
      * livewire event handler that emit broadcast event : setTyping
+     * 
      */
     public function broadcastTyping($event)
     {
         broadcast(new setTyping($this->conversation->id, $event))->toOthers();
+    }
+
+    /**
+     * check online state in every request.
+     */
+    public function booted()
+    {
+        $users = User::all();
+        foreach ($users as $user) {
+            $this->onlineState[$user->id] = ($user->activity < now()) ? false : true;
+        }
     }
 
     public function render()

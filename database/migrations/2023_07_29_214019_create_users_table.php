@@ -29,6 +29,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedInteger('current_biz_id')->nullable();
+            $table->dateTime('activity')->default(now());
         });
     }
 
