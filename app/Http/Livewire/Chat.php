@@ -24,6 +24,7 @@ class Chat extends Component
     public $content;
     public $searchWord = '';
     public $isTypingInterlocutor = false;
+    public $lastOnline = '';
 
     public function getListeners()
     {
@@ -40,6 +41,7 @@ class Chat extends Component
     public function openConversation($conversationId)
     {
         $this->conversation = Conversation::find($conversationId);
+        $this->getLastOnline();
         $this->getMessages();
         $this->reset('content');
         $this->resetSearch();
@@ -127,6 +129,7 @@ class Chat extends Component
             'participant_a_id' => $this->myUserId,
             'participant_b_id' => $interlocutorId,
         ]);
+        $this->getLastOnline();
         $this->conversations = auth()->user()->conversations();
         $this->getUser();
         $this->getUnreadMessage();
@@ -162,6 +165,17 @@ class Chat extends Component
             $this->numUnread[$conversation->id] = Message::where('conversation_id', $conversation->id)->where('user_id', '!=', $this->myUserId)->whereNull('seen')->count();
         }
         $this->totalUnread = array_sum($this->numUnread);
+    }
+
+    /**
+     * 
+     */
+    public function getLastOnline()
+    {
+        $activity = $this->conversation->interlocutor()->activity;
+        $dateTime = new \DateTime($activity);
+        $dateTime->sub(new \DateInterval('PT5M'));
+        $this->lastOnline = $dateTime->format('d-m, l, H:i');
     }
 
     /**

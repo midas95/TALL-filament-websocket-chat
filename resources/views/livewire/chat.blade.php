@@ -84,7 +84,7 @@
                 <div class='flex items-center border-b-2 border-slate-500 relative'>
                     <img src='{{ $conversation->interlocutor()->getAvatarUrl() }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
                     <span>{{ $conversation->interlocutor()->name }}</span>
-                    <span class='absolute text-xs bottom-0.5 left-12'>Last online </span>
+                    <span class='absolute text-xs bottom-0.5 left-12'>Last online {{$lastOnline}}</span>
                 </div>
                 <div class="h-[65vh] overflow-y-auto" id="chatBox">
                     <?php $uId = 0;
@@ -96,7 +96,7 @@
                         } else {
                             $repeated = true;
                         } ?>
-                        <x-chat.message :$message :$myUserId :$repeated :$conversation :$loop />
+                        <x-chat.message :$message :$myUserId :$repeated :$conversation/>
                     @endforeach
                 </div>
                 <x-chat.input :$isTypingInterlocutor :$conversation/>

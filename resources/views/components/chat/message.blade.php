@@ -1,4 +1,4 @@
-@props(['message', 'myUserId', 'repeated' , 'conversation', 'loop'])
+@props(['message', 'myUserId', 'repeated' , 'conversation'])
 
 @if($conversation['type'] == 'private')
     @if($message['user_id'] == $myUserId)
