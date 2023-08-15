@@ -20,11 +20,26 @@
                     </li>
                 </ul>
             </div>
-            <input wire:model="searchWord" class="rounded-md w-full mt-3" placeholder="Search Biz or Person">
+            <div class='flex items-center'>
+                @if($searchWord !== '')
+                    <div class='mt-3' wire:click="resetSearch">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="32" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                        </svg>
+                    </div>
+                @endif
+                <input wire:model="searchWord" class="rounded-md w-full mt-3" placeholder="Search Biz or Person">
+            </div>
             <ul class="h-[65vh] overflow-y-auto">
                 <h3 class='text-xl font-bold py-2'>Conversations</h3>
+                @php
+                    $conversationCounter = 0;
+                @endphp
                 @foreach ($conversations as $c)
                     @if (stripos($c->interlocutor()->name, $searchWord) !== false)
+                        @php
+                                $conversationCounter++;
+                        @endphp                    
                         <li wire:click="openConversation({{ $c->id }})"
                             class="flex items-center cursor-pointer relative {{ $conversation && $conversation->id === $c->id ? 'bg-gray-200' : '' }}">
                             @if($onlineState[$c->interlocutor()->id])
@@ -38,24 +53,39 @@
                         </li>
                     @endif
                 @endforeach
-                <h3 class='text-xl font-bold py-2'>Users</h3>
-                @foreach ($users as $u)
-                    @if (stripos($u->name, $searchWord) !== false && $u->id !== $myUserId)
-                        <li wire:click="createConversation({{ $u->id }})"
-                            class="flex items-center cursor-pointer">
-                            <img src='{{ $u->getAvatarUrl() }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
-                            {!! $this->emphasize($u->name, $searchWord) !!}
-                        </li>
+                @if($conversationCounter === 0)
+                    <div class='text-center'>There is no matched Conversation</div>
+                @endif
+                @if($searchWord !== '')
+                    <h3 class='text-xl font-bold py-2'>Users</h3>
+                    @php
+                        $userCounter = 0;
+                    @endphp
+                    @foreach ($users as $u)
+                        @if (stripos($u->name, $searchWord) !== false && $u->id !== $myUserId)
+                            @php
+                                $userCounter++;
+                            @endphp
+                            <li wire:click="createConversation({{ $u->id }})"
+                                class="flex items-center cursor-pointer">
+                                <img src='{{ $u->getAvatarUrl() }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
+                                {!! $this->emphasize($u->name, $searchWord) !!}
+                            </li>
+                        @endif
+                    @endforeach
+                    @if($userCounter===0)
+                        <div class='text-center'>There is no matched User</div>
                     @endif
-                @endforeach
+                @endif
             </ul>
         </div>
         <div class='grow'>
-            <div class='flex items-center border-b-2 border-slate-500'>
-                <img src='{{ auth()->user()->getAvatarUrl() }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
-                <span>{{ auth()->user()->name }}</span>
-            </div>
             @if ($conversation)
+                <div class='flex items-center border-b-2 border-slate-500 relative'>
+                    <img src='{{ $conversation->interlocutor()->getAvatarUrl() }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
+                    <span>{{ $conversation->interlocutor()->name }}</span>
+                    <span class='absolute text-xs bottom-0.5 left-12'>Last online </span>
+                </div>
                 <div class="h-[65vh] overflow-y-auto" id="chatBox">
                     <?php $uId = 0;
                     $repeated = false; ?>
@@ -69,7 +99,7 @@
                         <x-chat.message :$message :$myUserId :$repeated :$conversation :$loop />
                     @endforeach
                 </div>
-                <x-chat.input :$isTypingInterlocutor/>
+                <x-chat.input :$isTypingInterlocutor :$conversation/>
             @endif
         </div>
     </div>
@@ -86,16 +116,26 @@
             chatBox.scrollTop = chatBox.scrollHeight;
             if(read) {
                 readTimecounter = setTimeout(()=>{
-                    Livewire.emit('readMessage')
-                },500)
+                    @this.readMessage()
+                },3000)
             }
         })
     })
-    const setTyping = () => {
-        clearTimeout(typingTimer)
-        Livewire.emit('setTyping',true);
-        typingTimer = setTimeout(()=>{
-            Livewire.emit('setTyping', false);
-        },3000)
+    const setTyping = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (e.ctrlKey) {
+                let value = e.target.value + '\r\n';
+                @this.content = value;
+            } else {
+                @this.send();
+            }
+        } else {
+            clearTimeout(typingTimer);
+            @this.broadcastTyping(true);
+            typingTimer = setTimeout(() => {
+                @this.broadcastTyping(false);
+            }, 1000);
+        }
     }
 </script>

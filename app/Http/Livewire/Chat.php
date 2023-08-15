@@ -31,8 +31,6 @@ class Chat extends Component
             'echo:chat,NewChatMessage' => 'getNewMessage',
             'echo:read,ReadMessages' => 'getReadMessages',
             'echo:typingState,setTyping' => 'setTyping',
-            'readMessage' => 'readMessage',
-            'setTyping' => 'broadcastTyping'
         ];
     }
 
@@ -44,6 +42,7 @@ class Chat extends Component
         $this->conversation = Conversation::find($conversationId);
         $this->getMessages();
         $this->reset('content');
+        $this->resetSearch();
     }
 
     public function mount()
@@ -131,10 +130,11 @@ class Chat extends Component
         $this->conversations = auth()->user()->conversations();
         $this->getUser();
         $this->getUnreadMessage();
+        $this->resetSearch();
     }
 
     /**
-     * livewire event handler that make unread message to read message
+     * function that make unread message to read message
      */
     public function readMessage()
     {
@@ -175,12 +175,20 @@ class Chat extends Component
     }
 
     /**
-     * livewire event handler that emit broadcast event : setTyping
+     * handler that emit broadcast event : setTyping
      * 
      */
     public function broadcastTyping($event)
     {
         broadcast(new setTyping($this->conversation->id, $event))->toOthers();
+    }
+
+    /**
+     * reset search word to go back from search
+     */
+    public function resetSearch()
+    {
+        $this->reset('searchWord');
     }
 
     /**

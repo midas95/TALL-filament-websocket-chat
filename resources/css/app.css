@@ -23,44 +23,44 @@
 .dot-typing {
     margin-left: 20px;
     left: -9999px;
-    top: -15px;
+    top: -20px;
     width: 8px;
     height: 8px;
     border-radius: 4px;
-    background-color: #16151a;
-    color: #16151a;
-    box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
-        10014px 0 0 0 #16151a;
+    background-color: #0ea5e9;
+    color: #0ea5e9;
+    box-shadow: 9984px 0 0 0 #0ea5e9, 9999px 0 0 0 #0ea5e9,
+        10014px 0 0 0 #0ea5e9;
     animation: dot-typing 1.3s infinite linear;
 }
 
 @keyframes dot-typing {
     0% {
-        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
-            10014px 0 0 0 #16151a;
+        box-shadow: 9984px 0 0 0 #0ea5e9, 9999px 0 0 0 #0ea5e9,
+            10014px 0 0 0 #0ea5e9;
     }
     16.667% {
-        box-shadow: 9984px -10px 0 0 #16151a, 9999px 0 0 0 #16151a,
-            10014px 0 0 0 #16151a;
+        box-shadow: 9984px -10px 0 0 #0ea5e9, 9999px 0 0 0 #0ea5e9,
+            10014px 0 0 0 #0ea5e9;
     }
     33.333% {
-        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
-            10014px 0 0 0 #16151a;
+        box-shadow: 9984px 0 0 0 #0ea5e9, 9999px 0 0 0 #0ea5e9,
+            10014px 0 0 0 #0ea5e9;
     }
     50% {
-        box-shadow: 9984px 0 0 0 #16151a, 9999px -10px 0 0 #16151a,
-            10014px 0 0 0 #16151a;
+        box-shadow: 9984px 0 0 0 #0ea5e9, 9999px -10px 0 0 #0ea5e9,
+            10014px 0 0 0 #0ea5e9;
     }
     66.667% {
-        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
-            10014px 0 0 0 #16151a;
+        box-shadow: 9984px 0 0 0 #0ea5e9, 9999px 0 0 0 #0ea5e9,
+            10014px 0 0 0 #0ea5e9;
     }
     83.333% {
-        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
-            10014px -10px 0 0 #16151a;
+        box-shadow: 9984px 0 0 0 #0ea5e9, 9999px 0 0 0 #0ea5e9,
+            10014px -10px 0 0 #0ea5e9;
     }
     100% {
-        box-shadow: 9984px 0 0 0 #16151a, 9999px 0 0 0 #16151a,
-            10014px 0 0 0 #16151a;
+        box-shadow: 9984px 0 0 0 #0ea5e9, 9999px 0 0 0 #0ea5e9,
+            10014px 0 0 0 #0ea5e9;
     }
 }
