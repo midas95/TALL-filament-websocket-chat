@@ -95,7 +95,7 @@
                             $repeated = false;
                         } else {
                             $repeated = true;
-                        } ?>
+                        }  ?>
                         <x-chat.message :$message :$myUserId :$repeated :$conversation/>
                     @endforeach
                 </div>
@@ -109,7 +109,7 @@
 <script>
     let readTimecounter;
     let typingTimer;
-    document.addEventListener('livewire:load', function() {   
+    document.addEventListener('livewire:load', function() {
         Livewire.on('updateMessages', (read = true) => {
             clearTimeout(readTimecounter)
             let chatBox = document.getElementById("chatBox");
@@ -130,7 +130,10 @@
             } else {
                 @this.send();
             }
-        } else {
+        } else if ( e.key ==='ArrowUp' && @this.content.trim() === '' ){
+            @this.editMessage();
+        } 
+        else {
             clearTimeout(typingTimer);
             @this.broadcastTyping(true);
             typingTimer = setTimeout(() => {
@@ -138,4 +141,20 @@
             }, 1000);
         }
     }
+    const showAction = (e) => {
+        let action = e.target.nextElementSibling;
+        if (action) {
+         action.style.visibility = 'visible';
+         }
+    }
+    const editAction = (id)=>{
+        @this.editMessage(id);
+    }
+
+    document.addEventListener('mouseup', function(e) {
+        let container = document.querySelector('.action[style*="visibility: visible"]');
+        if(container){
+            container.style.visibility = 'hidden'
+        }
+    });
 </script>

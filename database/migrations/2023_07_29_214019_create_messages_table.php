@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('mark')->nullable();
             $table->text('content')->nullable();
             $table->dateTime('seen')->nullable();
+            $table->boolean('edited')->default(false);
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
         });

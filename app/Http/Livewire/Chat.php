@@ -12,7 +12,6 @@ use App\Models\User;
 
 class Chat extends Component
 {
-
     public $conversations;
     public $conversation;
     public $users;
@@ -21,10 +20,12 @@ class Chat extends Component
     public $onlineState = [];
     public $numUnread = [];
     public $totalUnread = 0;
-    public $content;
+    public $content = '';
     public $searchWord = '';
     public $isTypingInterlocutor = false;
     public $lastOnline = '';
+    public $editMessageId = 0;
+    public $myLastMessageId = 0;
 
     public function getListeners()
     {
@@ -63,16 +64,22 @@ class Chat extends Component
         if (empty(trim($this->content))) {
             return;
         }
-        $message = Message::create([
-            'conversation_id' => $this->conversation->id,
-            'user_id' => $this->myUserId,
-            'content' => $this->content,
-        ]);
-
-        broadcast(new NewChatMessage($message->id, $this->conversation->id))->toOthers();
-        $this->messages->push($message);
-        $this->emit('updateMessages', false);
-        $this->reset('content');
+        if($this->editMessageId === 0 ){
+            $message = Message::create([
+                'conversation_id' => $this->conversation->id,
+                'user_id' => $this->myUserId,
+                'content' => $this->content,
+            ]);
+    
+            broadcast(new NewChatMessage($message->id, $this->conversation->id))->toOthers();
+            $this->messages->push($message);
+            $this->emit('updateMessages', false);
+        } else {
+            Message::find($this->editMessageId)->update(['content'=>$this->content,'updated_at'=>now(),'edited'=>true]);
+            $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
+            $this->reset('editMessageId');
+        }   
+        $this->reset('content');     
     }
 
     /**
@@ -168,7 +175,7 @@ class Chat extends Component
     }
 
     /**
-     * 
+     * Show last online time
      */
     public function getLastOnline()
     {
@@ -176,6 +183,16 @@ class Chat extends Component
         $dateTime = new \DateTime($activity);
         $dateTime->sub(new \DateInterval('PT5M'));
         $this->lastOnline = $dateTime->format('d-m, l, H:i');
+    }
+
+    public function editMessage($id = 0){
+        if($id === 0){
+            $message = Message::where('conversation_id',$this->conversation->id)->where('user_id', $this->myUserId)->latest()->first();
+            $this->editMessageId = $message->id;
+        } else {
+            $this->editMessageId = $id;
+        }
+        $this->content = Message::find($this->editMessageId)->content;
     }
 
     /**
