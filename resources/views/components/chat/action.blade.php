@@ -6,6 +6,6 @@
             <li class='py-2 px-4 hover:bg-stone-700' onclick = {{'editAction('.$message->id.')'}}>Edit</li>
         @endif
        <li class='py-2 px-4 hover:bg-stone-700' onclick={{'answerAction('.$message->id.')'}}>Answer</li>
-       <li class='py-2 px-4 hover:bg-stone-700'>Make as Important</li>
+       <li class='py-2 px-4 hover:bg-stone-700' onclick={{'markAction('.$message->id.')'}}>Make as Important</li>
     </ul>
 </div>

@@ -3,6 +3,15 @@
 @if($conversation['type'] == 'private')
     @if($message['user_id'] == $myUserId)
         <div class='flex {{!$repeated?'mt-6':'mt-1 mr-14'}} justify-end '>
+            @php
+                $mark = explode(',', $message->mark);
+                $key = array_search(strval($myUserId), $mark);
+            @endphp
+            @if($key !== false) 
+                <svg xmlns="http://www.w3.org/2000/svg" height='40' fill="currentColor" class="bi bi-exclamation-lg my-auto text-red-800" viewBox="0 0 16 16">
+                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0L7.005 3.1ZM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z"/>
+                </svg>
+            @endif
             <div class='bg-emerald-800 text-white border-gray-300 p-1 pb-6 rounded-md {{!$repeated?'rounded-tr-none':''}} relative {{$message['edited']?'min-w-[120px]':''}}'>
                 @if(!$repeated)
                 <span class="absolute text-emerald-800 top-0" style="right: -8px;" >
@@ -46,7 +55,7 @@
             @if(!$repeated)<img src='{{$message['user']->getAvatarUrl()}}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />@endif
         </div>
     @else
-        <div class='flex {{!$repeated?'mt-6':'mt-1 ml-14'}} justify-start'>
+        <div class='flex {{!$repeated?'mt-6':'mt-1 ml-14'}} justify-start relative'>
             @if(!$repeated)<img src='{{$message['user']->getAvatarUrl()}}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />@endif
             <div class='bg-black/50 p-1 pb-6 rounded-md text-white {{!$repeated?'rounded-tl-none':''}} relative'>
                 @if(!$repeated)
@@ -56,9 +65,9 @@
                 @endif
                 <div class="relative pr-2 message">
                      @if($message->answered_message_id)
-                        <div class='pl-1 mb-1 bg-blue-950  rounded-md relative w-full pr-4'>
-                            <div  class=' pl-1  border-solid border-l-4 border-blue-700'>
-                                <p class='font-bold text-blue-500'><i>{{$this->answerMessage($message->answered_message_id, true)->user->name}}</i></p>
+                        <div class='pl-1 mb-1 bg-emerald-950 rounded-md relative w-full pr-4'>
+                            <div  class=' pl-1  border-solid border-l-4 border-emerald-700'>
+                                <p class='font-bold text-emerald-500'><i>{{$this->answerMessage($message->answered_message_id, true)->user->name}}</i></p>
                                 {{$this->answerMessage($message->answered_message_id, true)->content}}
                             </div>
                         </div>
@@ -73,6 +82,16 @@
                 </div>
                 <div class="text-xs text-right absolute bottom-0 right-0 pr-2 pb-1">{{$message['updated_at']->format('H:i')}}</div>
             </div>
+            @php
+                $mark = explode(',', $message->mark);
+                $key = array_search(strval($myUserId), $mark);
+            @endphp
+            @if($key !== false) 
+                <svg xmlns="http://www.w3.org/2000/svg" height='40' fill="currentColor" class="bi bi-exclamation-lg h-full my-auto text-red-800" viewBox="0 0 16 16">
+                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0L7.005 3.1ZM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z" />
+                </svg>
+            @endif
         </div>
+         
     @endif
 @endif

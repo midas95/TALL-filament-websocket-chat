@@ -228,6 +228,25 @@ class Chat extends Component
     }
 
     /**
+     * Set mark id in message mark
+     */
+    public function markMessage($id)
+    {
+        $message = Message::find($id);
+        $mark = explode(',', $message->mark);
+        $key = array_search(strval($this->myUserId), $mark);
+
+        if ($key === false) {
+            array_push($mark, strval($this->myUserId));
+        } else {
+            unset($mark[$key]);
+        }
+        $message->mark = implode(',', $mark);
+        $message->save();
+        $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
+    }
+
+    /**
      * broadcast event handler that set typing state. 
      */
     public function setTyping($event)

@@ -156,6 +156,9 @@
     const cancelAnswer = ()=>{
         @this.answerMessage();
     }
+    const markAction = (id)=>{
+        @this.markMessage(id);
+    }
 
     document.addEventListener('mouseup', function(e) {
         let container = document.querySelector('.action[style*="visibility: visible"]');
