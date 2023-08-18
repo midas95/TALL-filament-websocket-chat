@@ -26,6 +26,7 @@ class Chat extends Component
     public $lastOnline = '';
     public $editMessageId = 0;
     public $myLastMessageId = 0;
+    public $answeredMessage;
 
     public function getListeners()
     {
@@ -45,6 +46,7 @@ class Chat extends Component
         $this->getLastOnline();
         $this->getMessages();
         $this->reset('content');
+        $this->reset('answeredMessage');
         $this->resetSearch();
     }
 
@@ -61,25 +63,33 @@ class Chat extends Component
      */
     public function send()
     {
+
         if (empty(trim($this->content))) {
             return;
         }
-        if($this->editMessageId === 0 ){
+        if ($this->answeredMessage) {
+            $answeredMessageId = $this->answeredMessage->id;
+        } else {
+            $answeredMessageId = null;
+        }
+        if ($this->editMessageId === 0) {
             $message = Message::create([
                 'conversation_id' => $this->conversation->id,
                 'user_id' => $this->myUserId,
                 'content' => $this->content,
+                'answered_message_id' => $answeredMessageId,
             ]);
-    
             broadcast(new NewChatMessage($message->id, $this->conversation->id))->toOthers();
             $this->messages->push($message);
             $this->emit('updateMessages', false);
         } else {
-            Message::find($this->editMessageId)->update(['content'=>$this->content,'updated_at'=>now(),'edited'=>true]);
+            Message::find($this->editMessageId)->update(['content' => $this->content, 'answered_message_id' => $answeredMessageId, 'updated_at' => now(), 'edited' => true]);
+            broadcast(new ReadMessages($this->conversation->id))->toOthers();
             $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
             $this->reset('editMessageId');
-        }   
-        $this->reset('content');     
+        }
+        $this->reset('content');
+        $this->reset('answeredMessage');
     }
 
     /**
@@ -184,15 +194,37 @@ class Chat extends Component
         $dateTime->sub(new \DateInterval('PT5M'));
         $this->lastOnline = $dateTime->format('d-m, l, H:i');
     }
-
-    public function editMessage($id = 0){
-        if($id === 0){
-            $message = Message::where('conversation_id',$this->conversation->id)->where('user_id', $this->myUserId)->latest()->first();
+    /**
+     * to get message to edit.
+     */
+    public function editMessage($id = 0)
+    {
+        if ($id === 0) {
+            $message = Message::where('conversation_id', $this->conversation->id)->where('user_id', $this->myUserId)->latest()->first();
             $this->editMessageId = $message->id;
+            $this->content = $message->content;
+            $this->answeredMessage = Message::find($message->answered_message_id);
         } else {
             $this->editMessageId = $id;
+            $message = Message::find($this->editMessageId);
+            $this->content = $message->content;
+            $this->answeredMessage = Message::find($message->answered_message_id);
         }
-        $this->content = Message::find($this->editMessageId)->content;
+    }
+    /**
+     * return message collection or set answered message.
+     */
+    public function answerMessage($id = null, $returnable = false)
+    {
+        if ($id) {
+            if ($returnable) {
+                return Message::find($id);
+            } else {
+                $this->answeredMessage = Message::find($id);
+            }
+        } else {
+            $this->reset('answeredMessage');
+        }
     }
 
     /**

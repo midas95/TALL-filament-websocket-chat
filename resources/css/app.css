@@ -20,14 +20,14 @@
     opacity: 0;
 }
 
-.message:hover >svg {
+.message:hover .content>svg {
     display: block;
 }
 .action {
     position: absolute;
     background: rgba(41, 41, 41);
     border-radius: 10px;
-    top: 25px;
+    top: 5px;
     width: 170px;
     z-index: 999;
 }

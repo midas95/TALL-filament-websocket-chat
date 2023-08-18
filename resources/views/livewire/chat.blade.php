@@ -99,7 +99,7 @@
                         <x-chat.message :$message :$myUserId :$repeated :$conversation/>
                     @endforeach
                 </div>
-                <x-chat.input :$isTypingInterlocutor :$conversation/>
+                <x-chat.input :$isTypingInterlocutor :$conversation :$answeredMessage/>
             @endif
         </div>
     </div>
@@ -149,6 +149,12 @@
     }
     const editAction = (id)=>{
         @this.editMessage(id);
+    }
+    const answerAction = (id)=>{
+        @this.answerMessage(id);
+    }
+    const cancelAnswer = ()=>{
+        @this.answerMessage();
     }
 
     document.addEventListener('mouseup', function(e) {

@@ -11,9 +11,7 @@ class Message extends Model
     use HasFactory;
 
     protected $guarded = [];
-
-
-
+    
     // Relations
     public function conversation()
     {
@@ -32,8 +30,6 @@ class Message extends Model
     public function activity(){
         return $this->belongsTo(Activity::class);
     }
-
-
 
     // MorphMany Relations
     public function medias(){
