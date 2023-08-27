@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Helpers\BizHelper;
+use App\Helpers\ChatHelper;
 use App\Http\Traits\CinemaTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +13,7 @@ class Biz extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
-    
+
     protected $guarded = [];
 
 
@@ -22,7 +22,7 @@ class Biz extends Model implements HasMedia
     public function sector(){ return $this->belongsTo(Sector::class, 'sector_slug', 'slug'); }
     public function rooms(){ return $this->hasMany(Room::class); }
     public function legalForm(){ return $this->belongsTo(LegalForm::class); }
-    
+
     // associations for distributors and cinemas
     public function associations(){ return $this->belongsToMany(
         Biz::class,
@@ -56,7 +56,7 @@ class Biz extends Model implements HasMedia
     public function scopePrimaryAddress($query, $level = 'manager'){
         $query->leftJoin('addresses', function ($join) {
             $join->on( 'bizs.id', '=', 'addressable_id' )->where('addressable_type', Biz::class)->where('addresses.order', 0);
-        })->addSelect(BizHelper::primaryAddressSelect($level));
+        })->addSelect(ChatHelper::primaryAddressSelect($level));
     }
     public function scopePrimaryPhone($query){
         $query->leftJoin('phones', function ($join) {
@@ -74,8 +74,8 @@ class Biz extends Model implements HasMedia
         })->addSelect(['url']);
     }
 
-    
-    
+
+
 
 //    public function pcDistributor(){
 //        return $this->hasOne(PcDistributor::class, 'biz_id');

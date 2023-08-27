@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
@@ -36,6 +37,7 @@ class User extends Authenticatable implements FilamentUser
         'is_admin',
         'email',
         'password',
+        'activity'
     ];
 
     /**
@@ -57,6 +59,7 @@ class User extends Authenticatable implements FilamentUser
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'activity' => 'datetime',
     ];
 
     /**
@@ -72,7 +75,19 @@ class User extends Authenticatable implements FilamentUser
         return Conversation::where('type', 'private')->where(function($q){
             $q->where('participant_a_id', $this->id)
                 ->orWhere('participant_b_id', $this->id);
-        })->get();
+        });
+    }
+
+    public function conversationsWithInterlocutorName(){
+        return Conversation::select('conversations.*', 'users.id as interlocutorId', 'users.name as interlocutorName', 'users.activity as interlocutorActivity')
+            ->join('users', function($join) {
+                $join->on('users.id', '=', DB::raw('(case when participant_a_id = '.auth()->user()->id.' then participant_b_id else participant_a_id end)'));
+            })
+            ->where('type', 'private')
+            ->where(function($q){
+                $q->where('participant_a_id', $this->id)
+                ->orWhere('participant_b_id', $this->id);
+            });
     }
 
     public function canAccessFilament(): bool {
@@ -92,6 +107,11 @@ class User extends Authenticatable implements FilamentUser
             ->join(' ');
 
         return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&color=FFFFFF&background=111827';
+    }
+
+    public function isOnline(): bool
+    {
+       return $this->activity->diffInMinutes() < 5;
     }
 
 }

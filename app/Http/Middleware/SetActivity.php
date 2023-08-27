@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,9 +18,10 @@ class SetActivity
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check()) {
-            $user = User::find(auth()->id());
-            $user->activity = now()->addMinutes(5);
-            $user->save();
+            $user = auth()->user();
+            if($user->activity->diffInMinutes() >= 1){
+                $user->update(['activity' => now()]);
+            }
         }
         return $next($request);
     }

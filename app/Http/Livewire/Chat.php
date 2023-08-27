@@ -2,60 +2,57 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\IsTyping;
 use App\Events\NewChatMessage;
 use App\Events\ReadMessages;
-use App\Events\setTyping;
 use Livewire\Component;
 use App\Models\Message;
 use App\Models\Conversation;
-use App\Models\User;
 
 class Chat extends Component
 {
-    public $conversations;
+
+    public $conversationId;
     public $conversation;
-    public $users;
     public $myUserId;
     public $messages = [];
-    public $onlineState = [];
-    public $numUnread = [];
-    public $totalUnread = 0;
+
     public $content = '';
-    public $searchWord = '';
-    public $isTypingInterlocutor = false;
+    public $typingData = null;
     public $lastOnline = '';
     public $editMessageId = 0;
-    public $myLastMessageId = 0;
-    public $answeredMessage;
+    public $answerMessage;
+
+    public $alpineInit = false;
 
     public function getListeners()
     {
         return [
             'echo:chat,NewChatMessage' => 'getNewMessage',
             'echo:read,ReadMessages' => 'getReadMessages',
-            'echo:typingState,setTyping' => 'setTyping',
+            'echo:typingState,IsTyping' => 'setTyping',
+            'showConversation',
+            'broadcastTyping'
         ];
-    }
-
-    /**
-     * get conversation collection from conversation ID
-     */
-    public function openConversation($conversationId)
-    {
-        $this->conversation = Conversation::find($conversationId);
-        $this->getLastOnline();
-        $this->getMessages();
-        $this->reset('content');
-        $this->reset('answeredMessage');
-        $this->resetSearch();
     }
 
     public function mount()
     {
         $this->myUserId = auth()->user()->id;
-        $this->conversations = auth()->user()->conversations();
-        $this->getUnreadMessage();
-        $this->getUser();
+        $this->showConversation($this->conversationId);
+    }
+
+    /**
+     * Show conversation by id
+     */
+    public function showConversation($conversationId)
+    {
+        $this->conversation = Conversation::find($conversationId);
+        $this->getLastOnline();
+        $this->getMessages();
+        $this->reset('content');
+        $this->reset('answerMessage');
+
     }
 
     /**
@@ -63,16 +60,17 @@ class Chat extends Component
      */
     public function send()
     {
-
         if (empty(trim($this->content))) {
             return;
         }
-        if ($this->answeredMessage) {
-            $answeredMessageId = $this->answeredMessage->id;
-        } else {
-            $answeredMessageId = null;
+
+        $answeredMessageId = null;
+        if ($this->answerMessage) {
+            $answeredMessageId = $this->answerMessage->id;
         }
+
         if ($this->editMessageId === 0) {
+            // new message
             $message = Message::create([
                 'conversation_id' => $this->conversation->id,
                 'user_id' => $this->myUserId,
@@ -83,13 +81,18 @@ class Chat extends Component
             $this->messages->push($message);
             $this->emit('updateMessages', false);
         } else {
-            Message::find($this->editMessageId)->update(['content' => $this->content, 'answered_message_id' => $answeredMessageId, 'updated_at' => now(), 'edited' => true]);
-            broadcast(new ReadMessages($this->conversation->id))->toOthers();
+            // edit message
+            Message::find($this->editMessageId)
+                ->update([
+                    'content' => $this->content,
+                    'answered_message_id' => $answeredMessageId
+                ]);
+            broadcast(new ReadMessages($this->conversation->id, auth()->id()))->toOthers();
             $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
             $this->reset('editMessageId');
         }
         $this->reset('content');
-        $this->reset('answeredMessage');
+        $this->reset('answerMessage');
     }
 
     /**
@@ -102,86 +105,29 @@ class Chat extends Component
     }
 
     /**
-     * event handler for broadcast event : NewChatMessage
-     */
-    public function getNewMessage($event)
-    {
-        $message = Message::find($event['messageId']);
-        $this->getUnreadMessage();
-        if ($this->conversation !== null && $message->conversation->id === $this->conversation->id) {
-            $message['user_id'] !== auth()->user()->id && $this->messages->push($message);
-            $this->emit('updateMessages');
-        }
-    }
-
-    /**
-     * emphasize search word in string.
-     */
-    public function emphasize($string, $word)
-    {
-        $index1 = stripos($string, $word);
-        $index2 = strlen($word);
-        return substr($string, 0, $index1) . '<b>' . substr($string, $index1, $index2) . '</b>' . substr($string, $index1 + $index2);
-    }
-
-    /**
-     * Get users without users who have conversation
-     */
-    public function getUser()
-    {
-        $interlocutorIds = $this->conversations->map(function ($conversation) {
-            return $conversation->interlocutor(true);
-        })->all();
-        $this->users = User::whereNotIn('id', $interlocutorIds)
-            ->get();
-    }
-
-    /**
      * Create conversation with interlocutorId
      */
     public function createConversation($interlocutorId)
     {
-        $this->conversation = Conversation::create([
+        $this->conversation = Chat::create([
             'type' => 'private',
             'participant_a_id' => $this->myUserId,
             'participant_b_id' => $interlocutorId,
         ]);
         $this->getLastOnline();
-        $this->conversations = auth()->user()->conversations();
-        $this->getUser();
-        $this->getUnreadMessage();
-        $this->resetSearch();
     }
 
     /**
-     * function that make unread message to read message
+     * Mark messages as read and broadcast ReadMessages
      */
     public function readMessage()
     {
-        Message::where('conversation_id', $this->conversation->id)->where('user_id', '!=', $this->myUserId)->whereNull('seen')->update(['seen' => now()]);
-        $this->getUnreadMessage();
-        broadcast(new ReadMessages($this->conversation->id))->toOthers();
-    }
-
-    /**
-     * Broadcast event handler that get message to update reading state.
-     */
-    public function getReadMessages($event)
-    {
-        if ($this->conversation !== null && $event['conversationId'] === $this->conversation->id) {
-            $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
-        }
-    }
-
-    /**
-     * Get number of each unread messages and total unread messages.
-     */
-    public function getUnreadMessage()
-    {
-        foreach ($this->conversations as $conversation) {
-            $this->numUnread[$conversation->id] = Message::where('conversation_id', $conversation->id)->where('user_id', '!=', $this->myUserId)->whereNull('seen')->count();
-        }
-        $this->totalUnread = array_sum($this->numUnread);
+        Message::where('conversation_id', $this->conversation->id)
+            ->where('user_id', '!=', $this->myUserId)
+            ->whereNull('seen')
+            ->withoutTimestamps()
+            ->update(['seen' => now()]);
+        broadcast(new ReadMessages($this->conversation->id, auth()->id()));
     }
 
     /**
@@ -190,10 +136,25 @@ class Chat extends Component
     public function getLastOnline()
     {
         $activity = $this->conversation->interlocutor()->activity;
-        $dateTime = new \DateTime($activity);
-        $dateTime->sub(new \DateInterval('PT5M'));
-        $this->lastOnline = $dateTime->format('d-m, l, H:i');
+
+        $lastOnline = $activity->isoFormat('dddd, Y-mm-dd [at] HH:mm');
+
+        if($activity->isToday()){
+            $minutes = $activity->diffInMinutes();
+            if($minutes < 60) {
+                $lastOnline = $activity->diffForHumans();
+            }else{
+                $lastOnline = 'today at ' . $activity->format('H:i');
+            }
+        }else if($activity->isYesterday()){
+            $lastOnline = 'yesterday at ' . $activity->format('H:i');
+        }else if($activity->diffInDays() <= 6){
+            $lastOnline = $activity->isoFormat('dddd [at] HH:mm');
+        }
+
+        $this->lastOnline = $lastOnline;
     }
+
     /**
      * to get message to edit.
      */
@@ -203,28 +164,31 @@ class Chat extends Component
             $message = Message::where('conversation_id', $this->conversation->id)->where('user_id', $this->myUserId)->latest()->first();
             $this->editMessageId = $message->id;
             $this->content = $message->content;
-            $this->answeredMessage = Message::find($message->answered_message_id);
+            $this->answerMessage = Message::find($message->answered_message_id);
         } else {
             $this->editMessageId = $id;
             $message = Message::find($this->editMessageId);
             $this->content = $message->content;
-            $this->answeredMessage = Message::find($message->answered_message_id);
+            $this->answerMessage = Message::find($message->answered_message_id);
         }
     }
-    /**
-     * return message collection or set answered message.
-     */
-    public function answerMessage($id = null, $returnable = false)
+
+    public function cancelEdit()
     {
-        if ($id) {
-            if ($returnable) {
-                return Message::find($id);
-            } else {
-                $this->answeredMessage = Message::find($id);
-            }
-        } else {
-            $this->reset('answeredMessage');
-        }
+        $this->reset('answerMessage');
+        $this->reset('editMessageId');
+        $this->reset('content');
+
+    }
+
+    public function setAnswerMessage($id)
+    {
+        $this->answerMessage = Message::find($id);
+    }
+
+    public function resetAnswerMessage()
+    {
+        $this->reset('answerMessage');
     }
 
     /**
@@ -241,47 +205,86 @@ class Chat extends Component
         } else {
             unset($mark[$key]);
         }
-        $message->mark = implode(',', $mark);
-        $message->save();
+
+        Message::where('id', $id)->withoutTimestamps()->update(['mark' => implode(',', $mark)]);
         $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
     }
 
     /**
-     * broadcast event handler that set typing state. 
+     * broadcast: IsTyping
      */
-    public function setTyping($event)
+    public function broadcastTyping($typing)
     {
+        broadcast(new IsTyping($this->conversation->id, $typing, auth()->user()->only(['id', 'name'])))->toOthers();
+    }
+
+    /**
+     * Event handlers
+     *
+     */
+
+    /**
+     * broadcast event handler: add message and emit updateMessages for interlocutor if conversation is active
+     */
+    public function getNewMessage($event)
+    {
+        // workaround for echo:Listeners on multiple components
+        $this->emit('newChatMessageLocal', $event);
+
+        $message = Message::find($event['messageId']);
+
+        if($message['user_id'] === auth()->id()) {
+            return;
+        }
+
+        if (
+            $this->conversation !== null &&
+            $this->conversation->id === $message->conversation_id
+
+        ) {
+            $this->messages->push($message);
+            $this->emit('updateMessages');
+        }
+
+    }
+
+    /**
+     * broadcast event handler: get Messages with updated reading state
+     */
+    public function getReadMessages($event)
+    {
+        // workaround for echo:Listeners on multiple components
+        $this->emit('readMessagesLocal', $event);
+
         if ($this->conversation !== null && $event['conversationId'] === $this->conversation->id) {
-            $this->isTypingInterlocutor = $event['isTyping'];
+            $this->messages = Message::where('conversation_id', $this->conversation->id)->orderBy('id', 'asc')->get();
         }
     }
 
     /**
-     * handler that emit broadcast event : setTyping
-     * 
+     * broadcast event handler: set typingUser
      */
-    public function broadcastTyping($event)
+    public function setTyping($event)
     {
-        broadcast(new setTyping($this->conversation->id, $event))->toOthers();
+        if($this->conversation == null){
+            return;
+        }
+        if ( $this->conversation->id === $event['conversationId'] || ($this->typingData && $this->typingData['conversationId'] === $event['conversationId'])) {
+            if($event['isTyping']){
+                $this->typingData = $event;
+            }else if($this->typingData && $this->typingData['user']['id'] == $event['user']['id']){
+                $this->typingData = null;
+            }
+        }
     }
 
-    /**
-     * reset search word to go back from search
-     */
-    public function resetSearch()
-    {
-        $this->reset('searchWord');
-    }
 
     /**
      * check online state in every request.
      */
-    public function booted()
+    public function updatedAlpineInit($value)
     {
-        $users = User::all();
-        foreach ($users as $user) {
-            $this->onlineState[$user->id] = ($user->activity < now()) ? false : true;
-        }
+        $this->emit('updateMessages');
     }
 
     public function render()

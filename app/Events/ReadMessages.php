@@ -15,12 +15,14 @@ class ReadMessages implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $conversationId;
+    public $userId;
     /**
      * Create a new event instance.
      */
-    public function __construct($conversationId)
+    public function __construct($conversationId, $userId)
     {
         $this->conversationId = $conversationId;
+        $this->userId = $userId;
     }
 
     /**

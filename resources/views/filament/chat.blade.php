@@ -1,4 +1,16 @@
 <x-filament::page>
-  @livewire('chat')
+
+    <div class="container">
+        <div class="flex">
+            @livewire('conversations')
+            @livewire('chat', ['conversationId'=>2])
+        </div>
+    </div>
+
+
+
+
+
+
 </x-filament::page>
 

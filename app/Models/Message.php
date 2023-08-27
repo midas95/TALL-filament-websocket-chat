@@ -11,7 +11,7 @@ class Message extends Model
     use HasFactory;
 
     protected $guarded = [];
-    
+
     // Relations
     public function conversation()
     {
@@ -35,4 +35,14 @@ class Message extends Model
     public function medias(){
         return $this->morphMany(Media::class, 'model');
     }
+
+    public function getEditedAttribute(){
+        return $this->created_at != $this->updated_at;
+    }
+
+    public function scopeWithoutTimestamps($query) {
+        $this->timestamps = false;
+        return $query;
+    }
+
 }

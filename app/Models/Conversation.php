@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Conversation extends Model
 {
@@ -20,7 +21,7 @@ class Conversation extends Model
     }
 
     // Relations
-    public function massages()
+    public function messages()
     {
         return $this->hasMany(Message::class);
     }
@@ -58,4 +59,9 @@ class Conversation extends Model
             ];
         }
     }
+
+    public function unreadMessages(){
+        return $this->messages()->whereNull('seen')->where('user_id', '!=', Auth::id());
+    }
+
 }
