@@ -18,6 +18,9 @@
                 </span>
                 @endif
                 <div class=" message relative p1-2">
+                    @if ($message->file)
+                        <img src="{{ asset($message->file) }}" height='250' width='250'/>
+                    @endif
                     @if($message->answered_message_id)
                         <div class='pl-1 mb-1 bg-emerald-900 rounded-md relative w-full pr-4'>
                             <div  class=' pl-1  border-solid border-l-4 border-emerald-700'>

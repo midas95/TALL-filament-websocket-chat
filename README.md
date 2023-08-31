@@ -4,8 +4,12 @@
 
 ```
 composer install
-```
 
+```
+### Connect Storage link to upload
+```
+php artisan storage:link
+```
 **-> Setup DB-Connection in .env file!**
 
 ```

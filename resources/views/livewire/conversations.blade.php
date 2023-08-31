@@ -35,7 +35,7 @@
                     @if($this->isOnline($c['interlocutorActivity']))
                         <div class="absolute items-center justify-center w-4 h-4 text-xs font-bold text-white bg-green-500 border-2 border-white rounded-full top-1 left-9"></div>
                     @endif
-                    <img src='{{ $this->getAvatarUrl($c['interlocutorName']) }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
+                    <img src="{{ $this->getAvatarUrl($c['interlocutorName']) }}" alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
                     {{$c['interlocutorName']}}
                     @if($c['unread_messages_count'] > 0)
                         <div class="rounded-full h-5 w-5 ml-1 flex items-center justify-center bg-red-500 text-white">{{$c['unread_messages_count']}}</div>
@@ -49,7 +49,7 @@
                     @if($this->isOnline($c['interlocutorActivity']))
                         <div class="absolute items-center justify-center w-4 h-4 text-xs font-bold text-white bg-green-500 border-2 border-white rounded-full top-1 left-9"></div>
                     @endif
-                    <img src='{{ $this->getAvatarUrl($c['interlocutorName']) }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
+                    <img src="{{ $this->getAvatarUrl($c['interlocutorName']) }}" alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
 
                     {!! $this->emphasize($c['interlocutorName'], $search) !!}
                     @if($c['unread_messages_count'] > 0)
@@ -66,7 +66,7 @@
                     @if($this->isOnline($u['activity']))
                         <div class="absolute items-center justify-center w-4 h-4 text-xs font-bold text-white bg-green-500 border-2 border-white rounded-full top-1 left-9"></div>
                     @endif
-                    <img src='{{ $this->getAvatarUrl($u['name']) }}' alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
+                    <img src="{{ $this->getAvatarUrl($u['name']) }}" alt='avatar' class='m-2 w-10 h-10 rounded-3xl' />
                     {!! $this->emphasize($u['name'], $search) !!}
                 </div>
             @empty

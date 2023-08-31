@@ -8,9 +8,11 @@ use App\Events\ReadMessages;
 use Livewire\Component;
 use App\Models\Message;
 use App\Models\Conversation;
+use Livewire\WithFileUploads;
 
 class Chat extends Component
 {
+    use WithFileUploads;
 
     public $conversationId;
     public $conversation;
@@ -24,6 +26,7 @@ class Chat extends Component
     public $answerMessage;
 
     public $alpineInit = false;
+    public $file;
 
     public function getListeners()
     {
@@ -60,9 +63,13 @@ class Chat extends Component
      */
     public function send()
     {
-        if (empty(trim($this->content))) {
+        if (empty(trim($this->content)) && is_null($this->file)) {
             return;
         }
+        if ($this->file) {
+            $image = $this->file->store('uploads');
+        }
+
 
         $answeredMessageId = null;
         if ($this->answerMessage) {
@@ -71,11 +78,13 @@ class Chat extends Component
 
         if ($this->editMessageId === 0) {
             // new message
+            
             $message = Message::create([
                 'conversation_id' => $this->conversation->id,
                 'user_id' => $this->myUserId,
                 'content' => $this->content,
                 'answered_message_id' => $answeredMessageId,
+                'file'=>$image,
             ]);
             broadcast(new NewChatMessage($message->id, $this->conversation->id))->toOthers();
             $this->messages->push($message);
@@ -139,16 +148,16 @@ class Chat extends Component
 
         $lastOnline = $activity->isoFormat('dddd, Y-mm-dd [at] HH:mm');
 
-        if($activity->isToday()){
+        if ($activity->isToday()) {
             $minutes = $activity->diffInMinutes();
-            if($minutes < 60) {
+            if ($minutes < 60) {
                 $lastOnline = $activity->diffForHumans();
-            }else{
+            } else {
                 $lastOnline = 'today at ' . $activity->format('H:i');
             }
-        }else if($activity->isYesterday()){
+        } else if ($activity->isYesterday()) {
             $lastOnline = 'yesterday at ' . $activity->format('H:i');
-        }else if($activity->diffInDays() <= 6){
+        } else if ($activity->diffInDays() <= 6) {
             $lastOnline = $activity->isoFormat('dddd [at] HH:mm');
         }
 
@@ -233,7 +242,7 @@ class Chat extends Component
 
         $message = Message::find($event['messageId']);
 
-        if($message['user_id'] === auth()->id()) {
+        if ($message['user_id'] === auth()->id()) {
             return;
         }
 
@@ -266,18 +275,17 @@ class Chat extends Component
      */
     public function setTyping($event)
     {
-        if($this->conversation == null){
+        if ($this->conversation == null) {
             return;
         }
-        if ( $this->conversation->id === $event['conversationId'] || ($this->typingData && $this->typingData['conversationId'] === $event['conversationId'])) {
-            if($event['isTyping']){
+        if ($this->conversation->id === $event['conversationId'] || ($this->typingData && $this->typingData['conversationId'] === $event['conversationId'])) {
+            if ($event['isTyping']) {
                 $this->typingData = $event;
-            }else if($this->typingData && $this->typingData['user']['id'] == $event['user']['id']){
+            } else if ($this->typingData && $this->typingData['user']['id'] == $event['user']['id']) {
                 $this->typingData = null;
             }
         }
     }
-
 
     /**
      * check online state in every request.

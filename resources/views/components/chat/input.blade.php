@@ -1,4 +1,4 @@
-@props(['typingData' => null, 'conversation', 'answerMessage'=>null, 'editMessageId' => null])
+@props(['typingData' => null, 'conversation', 'answerMessage'=>null, 'editMessageId' => null, 'file'])
 <div class='flex flex-col mt-8 relative'>
     @if ($typingData && $conversation->id === $typingData['conversationId'])
         <div class='dot-typing absolute'></div>
@@ -21,8 +21,12 @@
     @endif
     <div class='flex items-center h-16 relative w-full'>
         <div class="upload-btn-wrapper flex items-center mx-3">
+        @if ($file)
+            <img src="{{ $file->temporaryUrl() }}" height='32' width='32'>
+        @else
             <x-chat.icons name='plus-lg' height='32' width='32' />
-            <input type="file" name="myfile"/>
+        @endif
+            <input type="file" name="myfile" wire:model='file' />
         </div>
         <textarea class='rounded-md grow text-black h-12'
           wire:model.debounce.300ms='content'

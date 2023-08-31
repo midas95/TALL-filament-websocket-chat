@@ -19,7 +19,7 @@
                 <x-chat.message :$message :$myUserId :$repeated :$conversation/>
             @endforeach
         </div>
-        <x-chat.input :$typingData :$conversation :$answerMessage :$editMessageId/>
+        <x-chat.input :$typingData :$conversation :$answerMessage :$editMessageId :$file/>
     @else
 
         <div>No active conversation.</div>

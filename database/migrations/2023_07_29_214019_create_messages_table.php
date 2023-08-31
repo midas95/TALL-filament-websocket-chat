@@ -21,6 +21,7 @@ return new class extends Migration
             $table->unsignedInteger('activity_id')->nullable();
             $table->string('mark')->nullable();
             $table->text('content')->nullable();
+            $table->text('file')->nullable();
             $table->dateTime('seen')->nullable();
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
