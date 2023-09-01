@@ -22,11 +22,11 @@
     <div class='flex items-center h-16 relative w-full'>
         <div class="upload-btn-wrapper flex items-center mx-3">
         @if ($file)
-            <img src="{{ $file->temporaryUrl() }}" height='32' width='32'>
+            <img src="{{ $file->temporaryUrl() }}" height='50' width='50' @click='resetFile()'>
         @else
             <x-chat.icons name='plus-lg' height='32' width='32' />
-        @endif
             <input type="file" name="myfile" wire:model='file' />
+        @endif         
         </div>
         <textarea class='rounded-md grow text-black h-12'
           wire:model.debounce.300ms='content'

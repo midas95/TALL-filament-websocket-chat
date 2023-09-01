@@ -67,7 +67,7 @@ class Chat extends Component
             return;
         }
         if ($this->file) {
-            $image = $this->file->store('uploads');
+            $image = $this->file->store('uploads/' . $this->conversation->id);
         }
 
 
@@ -78,13 +78,13 @@ class Chat extends Component
 
         if ($this->editMessageId === 0) {
             // new message
-            
+
             $message = Message::create([
                 'conversation_id' => $this->conversation->id,
                 'user_id' => $this->myUserId,
                 'content' => $this->content,
                 'answered_message_id' => $answeredMessageId,
-                'file'=>$image,
+                'file' => $image,
             ]);
             broadcast(new NewChatMessage($message->id, $this->conversation->id))->toOthers();
             $this->messages->push($message);
@@ -102,6 +102,7 @@ class Chat extends Component
         }
         $this->reset('content');
         $this->reset('answerMessage');
+        $this->reset('file');
     }
 
     /**

@@ -19,6 +19,7 @@
         "vite": "^4.4.4"
     },
     "dependencies": {
+        "@splidejs/splide": "^4.1.4",
         "bootstrap-icons": "^1.10.5",
         "laravel-echo": "^1.15.2",
         "pusher-js": "^8.3.0"

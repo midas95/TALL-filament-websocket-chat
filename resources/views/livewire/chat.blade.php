@@ -6,18 +6,21 @@
             <span>{{ $conversation->interlocutor()->name }}</span>
             <span class='absolute text-xs bottom-0.5 left-12'>Last online {{$lastOnline}}</span>
         </div>
-        <div class="h-[65vh] overflow-y-auto" x-ref="messages">
-            <?php $uId = 0;
-            $repeated = false; ?>
-            @foreach ($messages as $message)
-                <?php if ($uId != $message->user_id) {
-                    $uId = $message->user_id;
-                    $repeated = false;
-                } else {
-                    $repeated = true;
-                }  ?>
-                <x-chat.message :$message :$myUserId :$repeated :$conversation/>
-            @endforeach
+        <div class="h-[65vh] overflow-y-auto" x-ref="messages" >
+            <div x-data="{showCarousel: false}">
+                <?php $uId = 0;
+                $repeated = false; ?>
+                @foreach ($messages as $message)
+                    <?php if ($uId != $message->user_id) {
+                        $uId = $message->user_id;
+                        $repeated = false;
+                    } else {
+                        $repeated = true;
+                    }  ?>
+                    <x-chat.message :$message :$myUserId :$repeated :$conversation/>
+                @endforeach 
+                <x-chat.carousel  :$messages/>            
+            </div>
         </div>
         <x-chat.input :$typingData :$conversation :$answerMessage :$editMessageId :$file/>
     @else
@@ -67,15 +70,8 @@
                             readDebounce()
                         }
                     })
-
-                    // Livewire.hook('element.initialized', (component) => {
-                    //     console.log('initialized ')
-                    // })
-
-
                 },
                 typing(e) {
-
                     if(messageContent != e.target.value){
                         messageContent = e.target.value
                         if(!isTyping && messageContent != ''){
@@ -112,10 +108,43 @@
                 },
                 markAction(id){
                     @this.markMessage(id)
+                },
+                resetFile(){
+                    @this.file = null;
+                },
+                setCarousel () {
+                    let main = new Splide( '#main-carousel', {
+                        type      : 'fade',
+                        rewind    : true,
+                        pagination: false,
+                        arrows    : false,
+                    } );
+
+                    let thumbnails = new Splide( '#thumbnail-carousel', {
+                        fixedWidth  : 100,
+                        fixedHeight : 60,
+                        gap         : 10,
+                        rewind      : true,
+                        pagination  : false,
+                        isNavigation: true,
+                        breakpoints : {
+                        600: {
+                            fixedWidth : 60,
+                            fixedHeight: 44,
+                        },
+                        },
+                    } );
+
+                    main.sync( thumbnails );
+                    main.mount();
+                    thumbnails.mount();
                 }
             }))
+            
 
         })
+
+
     </script>
     @endpush
 

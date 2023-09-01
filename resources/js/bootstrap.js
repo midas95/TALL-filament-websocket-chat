@@ -15,7 +15,10 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
  * allows your team to easily build robust real-time web applications.
  */
 
-import 'bootstrap-icons/font/bootstrap-icons.css'
+import '@splidejs/splide/css/skyblue';
+
+import Splide from '@splidejs/splide';
+window.Splide = Splide;
 
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
